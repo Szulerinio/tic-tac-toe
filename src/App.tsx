@@ -1,29 +1,35 @@
 import "./App.css";
 import { assign, setup } from "xstate";
 import { useMachine } from "@xstate/react";
+import circle from "./assets/circle.svg";
+import cross from "./assets/cross.svg";
+
+type GameMap = ("" | "X" | "O")[][];
+
 export const oxoMachine = setup({
   types: {
     events: {} as
       | { type: "Played"; value: number }
       | { type: "Continue" }
       | { type: "Start" },
-    context: {} as { map: Readonly<Readonly<("" | "X" | "O")[]>[]> },
+    context: {} as {
+      map: GameMap;
+      currentPlayer: "" | "X" | "O";
+    },
   },
   actions: {
     makeMove: assign({
-      map: ({ context, event }, action) => {
-        // if(event.type==="Played")
-        const player = action?.player;
-        console.log(action);
-        console.log(event);
-        console.table(context.map);
+      map: ({ context, event }) => {
+        const currentPlayer = context.currentPlayer;
         const newMap = [...context.map];
+        if (event.type !== "Played") return newMap;
+        const row = Math.floor(event.value / newMap.length);
+        const col = event.value - row * newMap.length;
+        newMap[row][col] = currentPlayer;
         return newMap;
-        return [
-          ["", "", ""],
-          ["", "", ""],
-          ["", "", ""],
-        ] as const;
+      },
+      currentPlayer: ({ context }) => {
+        return context.currentPlayer == "X" ? "O" : "X";
       },
     }),
   },
@@ -33,7 +39,6 @@ export const oxoMachine = setup({
       let winnerX = true;
       let winnerO = true;
       //diagonals
-      return true;
       for (let i = 0; i < map.length; i++) {
         if (map[i][i] !== "X") {
           winnerX = false;
@@ -105,6 +110,7 @@ export const oxoMachine = setup({
       ["", "", ""],
       ["", "", ""],
     ],
+    currentPlayer: "X",
   },
   id: "oxoMachine",
   initial: "Idlee",
@@ -113,35 +119,18 @@ export const oxoMachine = setup({
       on: {
         Start: [
           {
-            target: "MoveX",
-            guard: {
-              type: "lastStartedO",
-            },
-          },
-          {
-            target: "MoveO",
+            target: "Move",
           },
         ],
       },
     },
-    MoveX: {
+    Move: {
       always: { target: "Finished", guard: { type: "isFinished" } },
       on: {
         Played: [
           {
-            actions: { type: "makeMove", params: { player: "y" } },
-            target: "MoveO",
-          },
-        ],
-      },
-    },
-    MoveO: {
-      always: { target: "Finished", guard: { type: "isFinished" } },
-      on: {
-        Played: [
-          {
-            actions: { type: "makeMove", params: { player: "o" } },
-            target: "MoveX",
+            actions: { type: "makeMove" },
+            target: "Move",
           },
         ],
       },
@@ -158,7 +147,7 @@ export const oxoMachine = setup({
 
 function App() {
   const [snapshot, send] = useMachine(oxoMachine);
-
+  const mapLength = snapshot.context.map.length;
   const makeMoveOn = (id: number) => {
     send({ type: "Played", value: id });
   };
@@ -179,20 +168,31 @@ function App() {
           height: "600px",
         }}
       >
-        {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((id) => (
-          <div
-            key={id}
-            style={{
-              background: "orange",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            onClick={() => makeMoveOn(id)}
-          >
-            {}
-          </div>
-        ))}
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((id) => {
+          const row = Math.floor(id / mapLength);
+          const col = id - row * mapLength;
+          const element = snapshot.context.map[row][col];
+          return (
+            <div
+              key={id}
+              style={{
+                background: "orange",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onClick={() => makeMoveOn(id)}
+            >
+              {element == "" ? null : (
+                <img
+                  src={element == "X" ? cross : circle}
+                  className="logo"
+                  alt={element == "X" ? cross : circle}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
     </>
   );
