@@ -15,6 +15,7 @@ export const oxoMachine = setup({
       currentPlayer: GameTileValue;
       stats: { x: number; draw: number; o: number };
     },
+    input: {} as { gridSize: number },
   },
   actions: {
     makeMove: assign({
@@ -80,15 +81,16 @@ export const oxoMachine = setup({
     },
   },
 }).createMachine({
-  context: {
-    map: [
-      ["", "", ""],
-      ["", "", ""],
-      ["", "", ""],
-    ],
-    lastStartingPlayer: "X",
-    currentPlayer: "O",
-    stats: { x: 0, draw: 0, o: 0 },
+  context: ({ input }) => {
+    const map = Array(input.gridSize)
+      .fill("")
+      .map(() => Array<GameTileValue>(input.gridSize).fill(""));
+    return {
+      map: map,
+      lastStartingPlayer: "X",
+      currentPlayer: "O",
+      stats: { x: 0, draw: 0, o: 0 },
+    };
   },
   id: "oxoMachine",
   initial: "Idlee",

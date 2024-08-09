@@ -5,8 +5,8 @@ import styled from "styled-components";
 import { oxoMachine } from "./oxoMachine";
 
 function App() {
-  const [snapshot, send] = useMachine(oxoMachine);
-  const mapLength = snapshot.context.map.length;
+  const [snapshot, send] = useMachine(oxoMachine, { input: { gridSize: 5 } });
+  const mapWidth = snapshot.context.map.length;
   const makeMoveOn = (id: number) => {
     send({ type: "Played", value: id });
   };
@@ -30,17 +30,17 @@ function App() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gridTemplateRows: "1fr 1fr 1fr",
+          gridTemplateColumns: `repeat(${mapWidth}, 1fr)`,
+          gridTemplateRows: `repeat(${mapWidth}, 1fr)`,
           gridGap: "5px",
           background: "black",
           width: "600px",
           height: "600px",
         }}
       >
-        {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((id) => {
-          const row = Math.floor(id / mapLength);
-          const col = id - row * mapLength;
+        {Array.from(Array(mapWidth * mapWidth).keys()).map((id) => {
+          const row = Math.floor(id / mapWidth);
+          const col = id - row * mapWidth;
           const element = snapshot.context.map[row][col];
           return (
             <div
@@ -86,7 +86,7 @@ const Button = styled.button({
 });
 
 const Symbol = styled.img({
-  height: "6em",
+  height: "50%",
   userDrag: "none",
   userSelect: "none",
 });
