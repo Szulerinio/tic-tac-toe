@@ -38,7 +38,11 @@ export function Game({ size = 3, goBack }: Props) {
         <NoButtonSpacer />
       )}
 
-      <CurrentPlayer>Current player: {currentPlayer}</CurrentPlayer>
+      {winner ? (
+        <Winner>Victorious player: {winner}</Winner>
+      ) : (
+        <CurrentPlayer>Current player: {currentPlayer}</CurrentPlayer>
+      )}
       <Standings>
         <StandingsHeader>Standings</StandingsHeader>
         <StandingValue>O Wins: {snapshot.context.stats.o}</StandingValue>
@@ -95,6 +99,8 @@ const StandingsHeader = styled.span({
 const StandingValue = styled.span({});
 
 const CurrentPlayer = styled.p({});
+
+const Winner = styled.p({});
 
 const NoButtonSpacer = styled.div({
   height: "42px",
