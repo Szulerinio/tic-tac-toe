@@ -9,6 +9,7 @@ interface Props {
   size: number;
   goBack: () => void;
 }
+
 export function Game({ size = 3, goBack }: Props) {
   const [snapshot, send] = useMachine(oxoMachine, {
     input: { gridSize: size },

@@ -8,6 +8,7 @@ interface Props {
   id: number;
   onClick: () => void;
 }
+
 export const GameTile = ({ element, id, onClick }: Props) => {
   return (
     <Container key={id} onClick={onClick}>
