@@ -1,8 +1,8 @@
-import "./App.css";
 import { assign, setup } from "xstate";
 import { useMachine } from "@xstate/react";
 import circle from "./assets/circle.svg";
 import cross from "./assets/cross.svg";
+import styled from "styled-components";
 
 type GameTileValue = "" | "X" | "O";
 type GameMap = GameTileValue[][];
@@ -185,10 +185,10 @@ function App() {
   return (
     <>
       {snapshot.value === "Idlee" ? (
-        <button onClick={() => send({ type: "Start" })}>START</button>
+        <Button onClick={() => send({ type: "Start" })}>START</Button>
       ) : null}
       {snapshot.value === "Won" || snapshot.value === "Draw" ? (
-        <button onClick={() => send({ type: "Continue" })}>Continue</button>
+        <Button onClick={() => send({ type: "Continue" })}>Continue</Button>
       ) : null}
       <span>Current player: {snapshot.context.currentPlayer}</span>
       <div
@@ -218,7 +218,7 @@ function App() {
               onClick={() => makeMoveOn(id)}
             >
               {element == "" ? null : (
-                <img
+                <Symbol
                   src={element == "X" ? cross : circle}
                   className="logo"
                   alt={element == "X" ? cross : circle}
@@ -233,3 +233,24 @@ function App() {
 }
 
 export default App;
+
+const Button = styled.button({
+  borderRadius: "8px",
+  border: "1px solid transparent",
+  padding: "0.6em 1.2em",
+  fontSize: "1em",
+  fontWeight: 500,
+  fontFamily: "inherit",
+  backgroundColor: "#1a1a1a",
+  cursor: "pointer",
+  transition: "border-color 0.25s",
+  "&:hover": {
+    borderColor: "#646cff",
+  },
+});
+
+const Symbol = styled.img({
+  height: "6em",
+  userDrag: "none",
+  userSelect: "none",
+});
