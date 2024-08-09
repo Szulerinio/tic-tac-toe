@@ -185,8 +185,12 @@ function App() {
 
   return (
     <>
-      <button onClick={() => send({ type: "Start" })}>START</button>
-      <button onClick={() => send({ type: "Continue" })}>Continue</button>
+      {snapshot.value === "Idlee" ? (
+        <button onClick={() => send({ type: "Start" })}>START</button>
+      ) : null}
+      {snapshot.value === "Won" || snapshot.value === "Draw" ? (
+        <button onClick={() => send({ type: "Continue" })}>Continue</button>
+      ) : null}
       <span>{JSON.stringify(snapshot)}</span>
       <div
         style={{
