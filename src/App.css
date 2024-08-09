@@ -10,6 +10,12 @@
   padding: 1.5em;
   will-change: filter;
   transition: filter 300ms;
+    user-drag: none;  
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
 }
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
