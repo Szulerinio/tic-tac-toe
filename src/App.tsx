@@ -4,9 +4,7 @@ import circle from "./assets/circle.svg";
 import cross from "./assets/cross.svg";
 import styled from "styled-components";
 import { calcResultForSymbol } from "./utils/calcResult";
-
-export type GameTileValue = "" | "X" | "O";
-export type GameMap = GameTileValue[][];
+import { GameMap, GameTileValue } from "./utils/misc";
 
 const oxoMachine = setup({
   types: {

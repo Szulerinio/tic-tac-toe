@@ -1,4 +1,4 @@
-import { GameMap, GameTileValue } from "../App";
+import { GameMap, GameTileValue } from "./misc";
 
 export const calcResultForSymbol = (map: GameMap, symbol: GameTileValue) => {
   return (
