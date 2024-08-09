@@ -191,7 +191,7 @@ function App() {
       {snapshot.value === "Won" || snapshot.value === "Draw" ? (
         <button onClick={() => send({ type: "Continue" })}>Continue</button>
       ) : null}
-      <span>{JSON.stringify(snapshot)}</span>
+      <span>Current player: {snapshot.context.currentPlayer}</span>
       <div
         style={{
           display: "grid",
