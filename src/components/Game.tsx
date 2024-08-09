@@ -3,9 +3,13 @@ import styled from "styled-components";
 import { oxoMachine } from "../oxoMachine";
 import { GameTileValue } from "../utils/misc";
 import { GameTile } from "./GameTile";
+import { Button } from "./Button";
 
-export function Game() {
-  const [snapshot, send] = useMachine(oxoMachine, { input: { gridSize: 3 } });
+interface Props {
+  size: number;
+}
+export function Game({ size = 3 }: Props) {
+  const [snapshot, send] = useMachine(oxoMachine, { input: { gridSize: size } });
 
   const mapWidth = snapshot.context.map.length;
   const currentPlayer = snapshot.context.currentPlayer;
@@ -51,21 +55,6 @@ export function Game() {
     </>
   );
 }
-
-const Button = styled.button({
-  borderRadius: "8px",
-  border: "1px solid transparent",
-  padding: "0.6em 1.2em",
-  fontSize: "1em",
-  fontWeight: 500,
-  fontFamily: "inherit",
-  backgroundColor: "#1a1a1a",
-  cursor: "pointer",
-  transition: "border-color 0.25s",
-  "&:hover": {
-    borderColor: "#646cff",
-  },
-});
 
 const GameMap = styled.div<{
   $mapWidth: number;
