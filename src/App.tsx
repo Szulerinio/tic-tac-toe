@@ -15,6 +15,7 @@ export const oxoMachine = setup({
       | { type: "Start" },
     context: {} as {
       map: GameMap;
+      lastStartingPlayer: GameTileValue;
       currentPlayer: GameTileValue;
     },
   },
@@ -34,11 +35,12 @@ export const oxoMachine = setup({
       },
     }),
     cleanMap: assign({
-      map: ({ context }) => {
-        return context.map.map(
-          (row) => row.map(() => "") satisfies GameTileValue[]
-        );
-      },
+      map: ({ context }) =>
+        context.map.map((row) => row.map(() => "") satisfies GameTileValue[]),
+      currentPlayer: ({ context }) =>
+        context.lastStartingPlayer == "X" ? "O" : "X",
+      lastStartingPlayer: ({ context }) =>
+        context.lastStartingPlayer == "X" ? "O" : "X",
     }),
   },
   guards: {
@@ -117,10 +119,6 @@ export const oxoMachine = setup({
       if (context.map[row][col] === "") return true;
       return false;
     },
-    lastStartedO: function ({ context, event }) {
-      // Add your guard condition here
-      return true;
-    },
   },
 }).createMachine({
   context: {
@@ -129,7 +127,8 @@ export const oxoMachine = setup({
       ["", "", ""],
       ["", "", ""],
     ],
-    currentPlayer: "X",
+    lastStartingPlayer: "X",
+    currentPlayer: "O",
   },
   id: "oxoMachine",
   initial: "Idlee",
