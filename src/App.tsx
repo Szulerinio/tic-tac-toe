@@ -42,7 +42,10 @@ export const oxoMachine = setup({
     }),
   },
   guards: {
-    isFinished: function ({ context }) {
+    isDrawn: function ({ context }) {
+      return !context.map.some((row) => row.some((col) => col === ""));
+    },
+    isWon: function ({ context }) {
       const map = context.map;
       let winnerX = true;
       let winnerO = true;
@@ -142,7 +145,10 @@ export const oxoMachine = setup({
       },
     },
     Move: {
-      always: { target: "Finished", guard: { type: "isFinished" } },
+      always: [
+        { target: "Won", guard: { type: "isWon" } },
+        { target: "Draw", guard: { type: "isDrawn" } },
+      ],
       on: {
         Played: [
           {
@@ -153,7 +159,14 @@ export const oxoMachine = setup({
         ],
       },
     },
-    Finished: {
+    Won: {
+      on: {
+        Continue: {
+          target: "Idlee",
+        },
+      },
+    },
+    Draw: {
       on: {
         Continue: {
           target: "Idlee",
