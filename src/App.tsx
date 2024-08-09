@@ -4,7 +4,8 @@ import { useMachine } from "@xstate/react";
 import circle from "./assets/circle.svg";
 import cross from "./assets/cross.svg";
 
-type GameMap = ("" | "X" | "O")[][];
+type GameTileValue = "" | "X" | "O";
+type GameMap = GameTileValue[][];
 
 export const oxoMachine = setup({
   types: {
@@ -14,7 +15,7 @@ export const oxoMachine = setup({
       | { type: "Start" },
     context: {} as {
       map: GameMap;
-      currentPlayer: "" | "X" | "O";
+      currentPlayer: GameTileValue;
     },
   },
   actions: {
@@ -30,6 +31,13 @@ export const oxoMachine = setup({
       },
       currentPlayer: ({ context }) => {
         return context.currentPlayer == "X" ? "O" : "X";
+      },
+    }),
+    cleanMap: assign({
+      map: ({ context }) => {
+        return context.map.map(
+          (row) => row.map(() => "") satisfies GameTileValue[]
+        );
       },
     }),
   },
@@ -86,16 +94,24 @@ export const oxoMachine = setup({
         winnerO = true;
         winnerX = true;
         for (let j = 0; j < map.length; j++) {
-          if (map[i][j] !== "X") {
+          if (map[j][i] !== "X") {
             winnerX = false;
           }
-          if (map[i][j] !== "O") {
+          if (map[j][i] !== "O") {
             winnerO = false;
           }
         }
         if (winnerX) return true;
         if (winnerO) return true;
       }
+      return false;
+    },
+    isLegalMove: function ({ context, event }) {
+      if (event.type !== "Played") return true;
+      const row = Math.floor(event.value / context.map.length);
+      const col = event.value - row * context.map.length;
+
+      if (context.map[row][col] === "") return true;
       return false;
     },
     lastStartedO: function ({ context, event }) {
@@ -116,6 +132,7 @@ export const oxoMachine = setup({
   initial: "Idlee",
   states: {
     Idlee: {
+      entry: { type: "cleanMap" },
       on: {
         Start: [
           {
@@ -129,6 +146,7 @@ export const oxoMachine = setup({
       on: {
         Played: [
           {
+            guard: { type: "isLegalMove" },
             actions: { type: "makeMove" },
             target: "Move",
           },
