@@ -18,7 +18,7 @@ function App() {
     );
   }
 
-  return <Game size={size}></Game>;
+  return <Game size={size} goBack={() => setSize(null)}></Game>;
 }
 
 export default App;

@@ -7,9 +7,12 @@ import { Button } from "./Button";
 
 interface Props {
   size: number;
+  goBack: () => void;
 }
-export function Game({ size = 3 }: Props) {
-  const [snapshot, send] = useMachine(oxoMachine, { input: { gridSize: size } });
+export function Game({ size = 3, goBack }: Props) {
+  const [snapshot, send] = useMachine(oxoMachine, {
+    input: { gridSize: size },
+  });
 
   const mapWidth = snapshot.context.map.length;
   const currentPlayer = snapshot.context.currentPlayer;
@@ -20,6 +23,9 @@ export function Game({ size = 3 }: Props) {
 
   return (
     <>
+      <GoBackButton onClick={goBack} title="Back to map size select">
+        X
+      </GoBackButton>
       {snapshot.value === "Idlee" ? (
         <Button onClick={() => send({ type: "Start" })}>START</Button>
       ) : snapshot.value === "WonX" ||
@@ -89,4 +95,8 @@ const CurrentPlayer = styled.p({});
 
 const NoButtonSpacer = styled.div({
   height: "42px",
+});
+
+const GoBackButton = styled(Button)({
+  display: "block",
 });
