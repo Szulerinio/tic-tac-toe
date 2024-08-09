@@ -17,7 +17,8 @@ export function Game({ size = 3, goBack }: Props) {
 
   const mapWidth = snapshot.context.map.length;
   const currentPlayer = snapshot.context.currentPlayer;
-
+  const winner =
+    snapshot.value === "WonO" ? "O" : snapshot.value === "WonX" ? "X" : "";
   const makeMoveOn = (id: number) => {
     send({ type: "Played", value: id });
   };
@@ -53,6 +54,7 @@ export function Game({ size = 3, goBack }: Props) {
             <GameTile
               key={id}
               element={element}
+              winner={winner}
               id={id}
               onClick={() => makeMoveOn(id)}
             ></GameTile>

@@ -1,5 +1,7 @@
 import circle from "../assets/circle.svg";
 import cross from "../assets/cross.svg";
+import circleWinner from "../assets/circleWinner.svg";
+import crossWinner from "../assets/crossWinner.svg";
 import styled from "styled-components";
 import { GameTileValue } from "../utils/misc";
 
@@ -7,16 +9,26 @@ interface Props {
   element: GameTileValue;
   id: number;
   onClick: () => void;
+  winner: GameTileValue;
 }
 
-export const GameTile = ({ element, id, onClick }: Props) => {
+export const GameTile = ({ element, id, onClick, winner }: Props) => {
+  const isWinner = element == winner;
   return (
     <Container key={id} onClick={onClick}>
       {element !== "" ? (
         <Symbol
-          src={element == "X" ? cross : circle}
+          src={
+            !isWinner
+              ? element == "X"
+                ? cross
+                : circle
+              : element == "X"
+              ? crossWinner
+              : circleWinner
+          }
           className="logo"
-          alt={element == "X" ? cross : circle}
+          alt={"X"}
         />
       ) : null}
     </Container>
