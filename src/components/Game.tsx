@@ -1,12 +1,12 @@
 import { useMachine } from "@xstate/react";
-import circle from "./assets/circle.svg";
-import cross from "./assets/cross.svg";
 import styled from "styled-components";
 import { oxoMachine } from "../oxoMachine";
-
+import { GameTileValue } from "../utils/misc";
+import { GameTile } from "./GameTile";
 export function Game() {
-  const [snapshot, send] = useMachine(oxoMachine, { input: { gridSize: 5 } });
+  const [snapshot, send] = useMachine(oxoMachine, { input: { gridSize: 3 } });
   const mapWidth = snapshot.context.map.length;
+  const currentPlayer = snapshot.context.currentPlayer;
   const makeMoveOn = (id: number) => {
     send({ type: "Played", value: id });
   };
@@ -21,49 +21,26 @@ export function Game() {
       snapshot.value === "Draw" ? (
         <Button onClick={() => send({ type: "Continue" })}>Continue</Button>
       ) : null}
-      <span>Current player: {snapshot.context.currentPlayer}</span>
+      <span>Current player: {currentPlayer}</span>
       <p>Stats:</p>
       <p>O:{snapshot.context.stats.o}</p>
       <p>Draws: {snapshot.context.stats.draw}</p>
       <p>X: {snapshot.context.stats.x}</p>
       <p>current state: {snapshot.value} </p>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${mapWidth}, 1fr)`,
-          gridTemplateRows: `repeat(${mapWidth}, 1fr)`,
-          gridGap: "5px",
-          background: "black",
-          width: "600px",
-          height: "600px",
-        }}
-      >
+      <GameMap mapWidth={mapWidth} currentPlayer={currentPlayer}>
         {Array.from(Array(mapWidth * mapWidth).keys()).map((id) => {
           const row = Math.floor(id / mapWidth);
           const col = id - row * mapWidth;
           const element = snapshot.context.map[row][col];
           return (
-            <div
-              key={id}
-              style={{
-                background: "orange",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
+            <GameTile
+              element={element}
+              id={id}
               onClick={() => makeMoveOn(id)}
-            >
-              {element == "" ? null : (
-                <Symbol
-                  src={element == "X" ? cross : circle}
-                  className="logo"
-                  alt={element == "X" ? cross : circle}
-                />
-              )}
-            </div>
+            ></GameTile>
           );
         })}
-      </div>
+      </GameMap>
     </>
   );
 }
@@ -83,8 +60,17 @@ const Button = styled.button({
   },
 });
 
-const Symbol = styled.img({
-  height: "50%",
-  userDrag: "none",
-  userSelect: "none",
-});
+const GameMap = styled.div<{ mapWidth: number; currentPlayer: GameTileValue }>(
+  ({ mapWidth, currentPlayer }) => ({
+    display: "grid",
+    gridTemplateColumns: `repeat(${mapWidth}, 1fr)`,
+    gridTemplateRows: `repeat(${mapWidth}, 1fr)`,
+    gridGap: "5px",
+    background: "black",
+    minWidth: "600px",
+    minHeight: "600px",
+    cursor: `url(${
+      currentPlayer == "X" ? "/src/assets/cross.svg" : "/src/assets/circle.svg"
+    }) 10 10, auto`,
+  })
+);
