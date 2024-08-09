@@ -3,11 +3,12 @@ import { useMachine } from "@xstate/react";
 import circle from "./assets/circle.svg";
 import cross from "./assets/cross.svg";
 import styled from "styled-components";
+import { calcResultForSymbol } from "./utils/calcResult";
 
-type GameTileValue = "" | "X" | "O";
-type GameMap = GameTileValue[][];
+export type GameTileValue = "" | "X" | "O";
+export type GameMap = GameTileValue[][];
 
-export const oxoMachine = setup({
+const oxoMachine = setup({
   types: {
     events: {} as
       | { type: "Played"; value: number }
@@ -17,6 +18,7 @@ export const oxoMachine = setup({
       map: GameMap;
       lastStartingPlayer: GameTileValue;
       currentPlayer: GameTileValue;
+      stats: { x: number; draw: number; o: number };
     },
   },
   actions: {
@@ -42,74 +44,36 @@ export const oxoMachine = setup({
       lastStartingPlayer: ({ context }) =>
         context.lastStartingPlayer == "X" ? "O" : "X",
     }),
+    addDraw: assign({
+      stats: ({ context }) => ({
+        ...context.stats,
+        draw: context.stats.draw + 1,
+      }),
+    }),
+    addWinX: assign({
+      stats: ({ context }) => ({
+        ...context.stats,
+        x: context.stats.x + 1,
+      }),
+    }),
+    addWinO: assign({
+      stats: ({ context }) => ({
+        ...context.stats,
+        o: context.stats.o + 1,
+      }),
+    }),
   },
   guards: {
     isDrawn: function ({ context }) {
       return !context.map.some((row) => row.some((col) => col === ""));
     },
-    isWon: function ({ context }) {
+    isWonByX: function ({ context }) {
       const map = context.map;
-      let winnerX = true;
-      let winnerO = true;
-      //diagonals
-      for (let i = 0; i < map.length; i++) {
-        if (map[i][i] !== "X") {
-          winnerX = false;
-        }
-        if (map[i][i] !== "O") {
-          winnerO = false;
-        }
-      }
-      if (winnerX) return true;
-      if (winnerO) return true;
-
-      //2nd diagonals
-      winnerX = true;
-      winnerO = true;
-
-      for (let i = 0; i < map.length; i++) {
-        if (map[i][map.length - 1 - i] !== "X") {
-          winnerX = false;
-        }
-        if (map[i][map.length - 1 - i] !== "O") {
-          winnerO = false;
-        }
-      }
-      if (winnerX) return true;
-      if (winnerO) return true;
-
-      //rows
-      for (let i = 0; i < map.length; i++) {
-        winnerO = true;
-        winnerX = true;
-        for (let j = 0; j < map.length; j++) {
-          if (map[i][j] !== "X") {
-            winnerX = false;
-          }
-          if (map[i][j] !== "O") {
-            winnerO = false;
-          }
-        }
-        if (winnerX) return true;
-        if (winnerO) return true;
-      }
-
-      //columns
-      for (let i = 0; i < map.length; i++) {
-        winnerO = true;
-        winnerX = true;
-        for (let j = 0; j < map.length; j++) {
-          if (map[j][i] !== "X") {
-            winnerX = false;
-          }
-          if (map[j][i] !== "O") {
-            winnerO = false;
-          }
-        }
-        if (winnerX) return true;
-        if (winnerO) return true;
-      }
-      return false;
+      return calcResultForSymbol(map, "X");
+    },
+    isWonByO: function ({ context }) {
+      const map = context.map;
+      return calcResultForSymbol(map, "O");
     },
     isLegalMove: function ({ context, event }) {
       if (event.type !== "Played") return true;
@@ -129,6 +93,7 @@ export const oxoMachine = setup({
     ],
     lastStartingPlayer: "X",
     currentPlayer: "O",
+    stats: { x: 0, draw: 0, o: 0 },
   },
   id: "oxoMachine",
   initial: "Idlee",
@@ -145,8 +110,21 @@ export const oxoMachine = setup({
     },
     Move: {
       always: [
-        { target: "Won", guard: { type: "isWon" } },
-        { target: "Draw", guard: { type: "isDrawn" } },
+        {
+          target: "WonX",
+          guard: { type: "isWonByX" },
+          actions: { type: "addWinX" },
+        },
+        {
+          target: "WonO",
+          guard: { type: "isWonByO" },
+          actions: { type: "addWinO" },
+        },
+        {
+          target: "Draw",
+          guard: { type: "isDrawn" },
+          actions: { type: "addDraw" },
+        },
       ],
       on: {
         Played: [
@@ -158,7 +136,14 @@ export const oxoMachine = setup({
         ],
       },
     },
-    Won: {
+    WonX: {
+      on: {
+        Continue: {
+          target: "Idlee",
+        },
+      },
+    },
+    WonO: {
       on: {
         Continue: {
           target: "Idlee",
@@ -187,10 +172,17 @@ function App() {
       {snapshot.value === "Idlee" ? (
         <Button onClick={() => send({ type: "Start" })}>START</Button>
       ) : null}
-      {snapshot.value === "Won" || snapshot.value === "Draw" ? (
+      {snapshot.value === "WonX" ||
+      snapshot.value === "WonO" ||
+      snapshot.value === "Draw" ? (
         <Button onClick={() => send({ type: "Continue" })}>Continue</Button>
       ) : null}
       <span>Current player: {snapshot.context.currentPlayer}</span>
+      <p>Stats:</p>
+      <p>O:{snapshot.context.stats.o}</p>
+      <p>Draws: {snapshot.context.stats.draw}</p>
+      <p>X: {snapshot.context.stats.x}</p>
+      <p>current state: {snapshot.value} </p>
       <div
         style={{
           display: "grid",
