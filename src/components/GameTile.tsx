@@ -2,6 +2,7 @@ import circle from "../assets/circle.svg";
 import cross from "../assets/cross.svg";
 import styled from "styled-components";
 import { GameTileValue } from "../utils/misc";
+
 interface Props {
   element: GameTileValue;
   id: number;
@@ -20,6 +21,7 @@ export const GameTile = ({ element, id, onClick }: Props) => {
     </Container>
   );
 };
+
 const Symbol = styled.img({
   height: "50%",
   userDrag: "none",
@@ -27,6 +29,7 @@ const Symbol = styled.img({
 });
 
 const Container = styled.div({
+  aspectRatio: 1,
   background: "orange",
   display: "flex",
   justifyContent: "center",

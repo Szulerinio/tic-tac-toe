@@ -3,10 +3,13 @@ import styled from "styled-components";
 import { oxoMachine } from "../oxoMachine";
 import { GameTileValue } from "../utils/misc";
 import { GameTile } from "./GameTile";
+
 export function Game() {
   const [snapshot, send] = useMachine(oxoMachine, { input: { gridSize: 3 } });
+
   const mapWidth = snapshot.context.map.length;
   const currentPlayer = snapshot.context.currentPlayer;
+
   const makeMoveOn = (id: number) => {
     send({ type: "Played", value: id });
   };
@@ -15,25 +18,29 @@ export function Game() {
     <>
       {snapshot.value === "Idlee" ? (
         <Button onClick={() => send({ type: "Start" })}>START</Button>
-      ) : null}
-      {snapshot.value === "WonX" ||
-      snapshot.value === "WonO" ||
-      snapshot.value === "Draw" ? (
+      ) : snapshot.value === "WonX" ||
+        snapshot.value === "WonO" ||
+        snapshot.value === "Draw" ? (
         <Button onClick={() => send({ type: "Continue" })}>Continue</Button>
-      ) : null}
-      <span>Current player: {currentPlayer}</span>
-      <p>Stats:</p>
-      <p>O:{snapshot.context.stats.o}</p>
-      <p>Draws: {snapshot.context.stats.draw}</p>
-      <p>X: {snapshot.context.stats.x}</p>
-      <p>current state: {snapshot.value} </p>
-      <GameMap mapWidth={mapWidth} currentPlayer={currentPlayer}>
+      ) : (
+        <NoButtonSpacer />
+      )}
+
+      <CurrentPlayer>Current player: {currentPlayer}</CurrentPlayer>
+      <Standings>
+        <StandingsHeader>Standings</StandingsHeader>
+        <StandingValue>O Wins: {snapshot.context.stats.o}</StandingValue>
+        <StandingValue>Draws: {snapshot.context.stats.draw}</StandingValue>
+        <StandingValue>X Wins: {snapshot.context.stats.x}</StandingValue>
+      </Standings>
+      <GameMap $mapWidth={mapWidth} $currentPlayer={currentPlayer}>
         {Array.from(Array(mapWidth * mapWidth).keys()).map((id) => {
           const row = Math.floor(id / mapWidth);
           const col = id - row * mapWidth;
           const element = snapshot.context.map[row][col];
           return (
             <GameTile
+              key={id}
               element={element}
               id={id}
               onClick={() => makeMoveOn(id)}
@@ -60,17 +67,37 @@ const Button = styled.button({
   },
 });
 
-const GameMap = styled.div<{ mapWidth: number; currentPlayer: GameTileValue }>(
-  ({ mapWidth, currentPlayer }) => ({
-    display: "grid",
-    gridTemplateColumns: `repeat(${mapWidth}, 1fr)`,
-    gridTemplateRows: `repeat(${mapWidth}, 1fr)`,
-    gridGap: "5px",
-    background: "black",
-    minWidth: "600px",
-    minHeight: "600px",
-    cursor: `url(${
-      currentPlayer == "X" ? "/src/assets/cross.svg" : "/src/assets/circle.svg"
-    }) 10 10, auto`,
-  })
-);
+const GameMap = styled.div<{
+  $mapWidth: number;
+  $currentPlayer: GameTileValue;
+}>(({ $mapWidth, $currentPlayer }) => ({
+  display: "grid",
+  gridTemplateColumns: `repeat(${$mapWidth}, 1fr)`,
+  gridTemplateRows: `repeat(${$mapWidth}, 1fr)`,
+  gridGap: "5px",
+  background: "black",
+  minWidth: "150px",
+  width: "min(75vw, 75vh)",
+  minHeight: "150px",
+  cursor: `url(${
+    $currentPlayer == "X" ? "/src/assets/cross.svg" : "/src/assets/circle.svg"
+  }) 10 10, auto`,
+}));
+
+const Standings = styled.div({
+  display: "grid",
+  gridTemplateColumns: "1fr 1fr 1fr",
+});
+
+const StandingsHeader = styled.span({
+  gridColumnStart: "1",
+  gridColumnEnd: "4",
+});
+
+const StandingValue = styled.span({});
+
+const CurrentPlayer = styled.p({});
+
+const NoButtonSpacer = styled.div({
+  height: "42px",
+});
